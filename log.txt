@@ -1,0 +1,1 @@
+osnadmin: error: parsing arguments: specified --channelID mychannel does not match channel ID sys-channel in config block. Try --help
