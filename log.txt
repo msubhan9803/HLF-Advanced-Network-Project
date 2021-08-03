@@ -1,1 +1,2 @@
-osnadmin: error: parsing arguments: specified --channelID mychannel does not match channel ID sys-channel in config block. Try --help
+Installed chaincodes on peer:
+Package ID: fabcar_1.0:c8b2fadfd0865027cef7118034fa114cb8f07602a59d0f40c3aad0244446b8f7, Label: fabcar_1.0
