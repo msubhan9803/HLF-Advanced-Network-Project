@@ -197,8 +197,8 @@ installChaincodeOnPeer1Org2() {
 queryInstalled() {
     peer lifecycle chaincode queryinstalled >&log.txt
     cat log.txt
-    PACKAGE_ID=$(sed -n "/${CC_NAME}_${VERSION}/{s/^Package ID: //; s/, Label:.*$//; p;}" log.txt)
-    echo PackageID is ${PACKAGE_ID}
+    CC_PACKAGE_ID=$(sed -n "/${CC_NAME}_${VERSION}/{s/^Package ID: //; s/, Label:.*$//; p;}" log.txt)
+    echo PackageID is ${CC_PACKAGE_ID}
 }
 
 approveChaincodeForOrg2() {
@@ -303,7 +303,7 @@ generateChannelArtifacts
 runNetwork
 createChannel
 
-sleep 5
+sleep 8
 
 joinChannelAsPeer0Org1
 joinChannelAsPeer1Org1
@@ -318,7 +318,7 @@ installChaincodeOnPeer0Org2
 installChaincodeOnPeer1Org2
 queryInstalled
 
-sleep 5
+sleep 8
 
 approveChaincodeForOrg2
 approveChaincodeForOrg1
