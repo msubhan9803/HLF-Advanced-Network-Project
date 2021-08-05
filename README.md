@@ -261,3 +261,121 @@ peer lifecycle chaincode commit -o localhost:7050 --ordererTLSHostnameOverride o
 FABRIC_LOGGING_SPEC=info
 CORE_CHAINCODE_LOGGING_SHIM=debug
 CORE_CHAINCODE_LOGGING_LEVEL=debug# HLF-Advanced-Network-Project
+
+
+
+=====================================
+### Adding New Org to Channel
+=====================================
+cd addOrg3-sample
+../bin/cryptogen generate --config=org3-crypto.yaml --output="../organizations"
+
+
+export FABRIC_CFG_PATH=$PWD
+../bin/configtxgen -printOrg Org3MSP > ../organizations/peerOrganizations/org3.example.com/org3.json
+
+docker-compose -f docker/docker-compose-org3.yaml up -d
+
+
+export PATH=${PWD}/../bin:$PATH
+export FABRIC_CFG_PATH=${PWD}/../
+export CORE_PEER_TLS_ENABLED=true
+export CORE_PEER_LOCALMSPID="Org1MSP"
+export CORE_PEER_TLS_ROOTCERT_FILE=${PWD}/../organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
+export CORE_PEER_MSPCONFIGPATH=${PWD}/../organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
+export CORE_PEER_ADDRESS=localhost:7051
+
+
+peer channel fetch config ../channel-artifacts/config_block.pb -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com -c mychannel --tls --cafile ../HLF-Practice-1-Aug-2021/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
+
+
+configtxlator proto_decode --input ../channel-artifacts/config_block.pb --type common.Block --output config_block.json
+jq .data.data[0].payload.data.config config_block.json > config.json
+
+
+jq -s '.[0] * {"channel_group":{"groups":{"Application":{"groups": {"Org3MSP":.[1]}}}}}' config.json ../organizations/peerOrganizations/org3.example.com/org3.json > modified_config.json
+
+
+configtxlator proto_encode --input config.json --type common.Config --output config.pb
+
+
+configtxlator proto_encode --input modified_config.json --type common.Config --output modified_config.pb
+
+
+configtxlator compute_update --channel_id mychannel --original config.pb --updated modified_config.pb --output org3_update.pb
+
+
+configtxlator proto_decode --input org3_update.pb --type common.ConfigUpdate --output org3_update.json
+
+
+echo '{"payload":{"header":{"channel_header":{"channel_id":"'mychannel'", "type":2}},"data":{"config_update":'$(cat org3_update.json)'}}}' | jq . > org3_update_in_envelope.json
+
+
+configtxlator proto_encode --input org3_update_in_envelope.json --type common.Envelope --output org3_update_in_envelope.pb
+
+cd ..
+peer channel signconfigtx -f ./addOrg3-sample/org3_update_in_envelope.pb
+
+
+export CORE_PEER_TLS_ENABLED=true
+export CORE_PEER_LOCALMSPID="Org2MSP"
+export CORE_PEER_TLS_ROOTCERT_FILE=./organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt
+export CORE_PEER_MSPCONFIGPATH=./organizations/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp
+export CORE_PEER_ADDRESS=localhost:9051
+
+
+peer channel update -f ./addOrg3-sample/org3_update_in_envelope.pb -c mychannel -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls --cafile ${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
+
+
+# Join Org3 to the Channel
+
+export CORE_PEER_TLS_ENABLED=true
+export CORE_PEER_LOCALMSPID="Org3MSP"
+export CORE_PEER_TLS_ROOTCERT_FILE=./organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls/ca.crt
+export CORE_PEER_MSPCONFIGPATH=./organizations/peerOrganizations/org3.example.com/users/Admin@org3.example.com/msp
+export CORE_PEER_ADDRESS=localhost:11051
+
+
+peer channel fetch 0 channel-artifacts/channel1.block -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com -c mychannel --tls --cafile ./organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
+
+peer channel join -b channel-artifacts/channel1.block
+
+
+# Configuring Leader Election
+
+CORE_PEER_GOSSIP_USELEADERELECTION=false
+CORE_PEER_GOSSIP_ORGLEADER=true
+
+# Note above env vars are for new peers to start getting blocks
+
+
+# Install, define, and invoke chaincode
+export PATH=${PWD}/../bin:$PATH
+export FABRIC_CFG_PATH=$PWD/../
+export CORE_PEER_TLS_ENABLED=true
+export CORE_PEER_LOCALMSPID="Org3MSP"
+export CORE_PEER_TLS_ROOTCERT_FILE=${PWD}/organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls/ca.crt
+export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/org3.example.com/users/Admin@org3.example.com/msp
+export CORE_PEER_ADDRESS=localhost:11051
+
+peer lifecycle chaincode install fabcar_1.0.tar.gz
+
+
+peer lifecycle chaincode queryinstalled
+
+export CC_PACKAGE_ID=package_id
+
+peer lifecycle chaincode approveformyorg -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls --cafile ${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem --channelID mychannel --name basic --version 1.0 --package-id $CC_PACKAGE_ID --sequence 1
+
+
+
+export CORE_PEER_LOCALMSPID="Org3MSP"
+export PEER0_ORG3_CA=${PWD}/organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls/ca.crt
+export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/org3.example.com/users/Admin@org3.example.com/msp
+export CORE_PEER_TLS_ROOTCERT_FILE=${PWD}/organizations/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls/ca.crt
+export CORE_PEER_ADDRESS=localhost:11051
+
+peer lifecycle chaincode approveformyorg -o localhost:7050 \
+    --ordererTLSHostnameOverride orderer.example.com --channelID mychannel \
+    --name basic --version 1.0 --package-id $CC_PACKAGE_ID --sequence 1 --tls \
+    --cafile ${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
