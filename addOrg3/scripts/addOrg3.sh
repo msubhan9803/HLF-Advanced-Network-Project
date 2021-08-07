@@ -132,7 +132,9 @@ joinChannel() {
 
 
 
+# generateOrg3Definition
 # fetchChannelConfig
 # createConfigUpdate
-# signConfigtxAsPeerOrg
-# joinChannel
+# signConfigAsPeerOrg
+# runOrg3Containers
+joinChannel
