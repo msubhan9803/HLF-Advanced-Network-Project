@@ -2,7 +2,7 @@ Organizations:
     - &Org1
         Name: Org1MSP
         ID: Org1MSP
-        MSPDir: ../../../../artifacts/channel/crypto-config/peerOrganizations/org1.example.com/msp
+        MSPDir: ../../../../channel-artifacts/peerOrganizations/org1.example.com/msp
         Policies:
             Readers:
                 Type: Signature
@@ -105,4 +105,3 @@ Profiles:
                 - *Org3
             Capabilities:
                 <<: *ApplicationCapabilities
-
