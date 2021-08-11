@@ -10,6 +10,13 @@ docker-compose -f docker-compose.yaml down -v
 cd scripts
 rm *.pb
 rm *.json
+rm *.tx
 rm ./channel-artifacts/mychannel.block
 
-cd ../../
+cd system-channel/scripts/
+rm *.pb
+rm *.json
+rm *.tx
+rm ./channel-artifacts/org1-org3-channel.block
+
+cd ../../../../

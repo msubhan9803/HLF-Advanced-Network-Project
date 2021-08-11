@@ -48,7 +48,7 @@ createChannel(){
     --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA
 }
 
-createChannel
+# createChannel
 
 
 generateOrg3Definition() {
@@ -161,7 +161,7 @@ updateAnchorPeers(){
     
 }
 
-# updateAnchorPeers
+updateAnchorPeers
 
 # joinChannel
 
