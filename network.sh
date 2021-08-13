@@ -274,7 +274,7 @@ queryAllCars() {
 createCar() {
     echo "===================== Invoking Create Car... ===================== "
 
-    peer chaincode invoke -C mychannel -n basic -c '{"Args":["createCar", "CAR10", "Pak", "My-Car", "Black", "Subhan"]}' \
+    peer chaincode invoke -C mychannel -n basic -c '{"Args":["createCar", "CAR14", "Pak", "Land Cruiser", "Black", "Subhan <><><>"]}' \
         --waitForEvent -o localhost:7050 --peerAddresses=localhost:7051 --peerAddresses=localhost:9051 \
         --tlsRootCertFiles channel-artifacts/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt \
         --tlsRootCertFiles channel-artifacts/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt --tls \
@@ -291,43 +291,43 @@ updateCar() {
         --cafile channel-artifacts/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
 }
 
-removeOldArtifacts
-generateCryptoMaterial
-generateChannelArtifacts
-runNetwork
+# removeOldArtifacts
+# generateCryptoMaterial
+# generateChannelArtifacts
+# runNetwork
 
-sleep 8
+# sleep 8
 
-createChannel
-sleep 5
-joinChannelAsPeer0Org1
-joinChannelAsPeer1Org1
-joinChannelAsPeer0Org2
-joinChannelAsPeer1Org2
-updateAnchorPeerOrg1
-updateAnchorPeerOrg2
-packageChaincode
-installChaincodeOnPeer0Org1
-installChaincodeOnPeer1Org1
-installChaincodeOnPeer0Org2
-installChaincodeOnPeer1Org2
-queryInstalled
+# createChannel
+# sleep 5
+# joinChannelAsPeer0Org1
+# joinChannelAsPeer1Org1
+# joinChannelAsPeer0Org2
+# joinChannelAsPeer1Org2
+# updateAnchorPeerOrg1
+# updateAnchorPeerOrg2
+# packageChaincode
+# installChaincodeOnPeer0Org1
+# installChaincodeOnPeer1Org1
+# installChaincodeOnPeer0Org2
+# installChaincodeOnPeer1Org2
+# queryInstalled
 
-sleep 8
+# sleep 8
 
-approveChaincodeForOrg2
-approveChaincodeForOrg1
-checkCommitReadiness
-commitChaincode
-queryCommitted
-invodeChaincode
+# approveChaincodeForOrg2
+# approveChaincodeForOrg1
+# checkCommitReadiness
+# commitChaincode
+# queryCommitted
+# invodeChaincode
 
-sleep 5
+# sleep 5
 
-queryAllCars
+# queryAllCars
 createCar
-updateCar
+# updateCar
 
-sleep 5
+# sleep 5
 
-queryAllCars
+# queryAllCars
